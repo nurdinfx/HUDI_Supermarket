@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, ShoppingBag, ShoppingCart, User, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { motion } from 'framer-motion';
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -19,7 +20,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2 z-50 flex justify-around items-center shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-100 px-2 py-2 z-50 flex justify-around items-center shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;
@@ -28,19 +29,23 @@ export default function BottomNav() {
           <Link 
             key={item.name} 
             href={item.href}
-            className={`flex flex-col items-center justify-center gap-1 px-3 py-1 rounded-xl transition-all relative ${
-              isActive ? 'text-[#2563EB]' : 'text-gray-500 hover:text-gray-900'
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-1 relative transition-all duration-300 ${
+              isActive ? 'text-[#2563EB]' : 'text-gray-400'
             }`}
           >
-            <div className={`p-1.5 rounded-lg transition-colors ${isActive ? 'bg-blue-50' : ''}`}>
+            <motion.div 
+              initial={false}
+              animate={isActive ? { scale: 1.1, y: -2 } : { scale: 1, y: 0 }}
+              className={`p-2 rounded-xl transition-colors ${isActive ? 'bg-blue-50 text-[#2563EB]' : 'bg-transparent'}`}
+            >
               <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
               {item.count > 0 && (
-                <span className="absolute top-1 right-2 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-bounce">
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
                   {item.count}
                 </span>
               )}
-            </div>
-            <span className={`text-[10px] font-bold uppercase tracking-tighter ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+            </motion.div>
+            <span className={`text-[10px] font-bold uppercase tracking-tight ${isActive ? 'opacity-100' : 'opacity-70 text-[9px]'}`}>
               {item.name}
             </span>
           </Link>
