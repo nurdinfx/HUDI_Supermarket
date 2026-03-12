@@ -135,7 +135,7 @@ export default function Navbar() {
           {/* Cart */}
           <Link href="/cart" className="flex items-end h-[50px] px-2 border border-transparent hover:border-white rounded-sm cursor-pointer transition-all ml-1 relative group">
             <div className="relative">
-              <ShoppingCart size={32} md:size={38} className="text-white" strokeWidth={1.5} />
+              <ShoppingCart className="text-white w-8 h-8 md:w-[38px] md:h-[38px]" strokeWidth={1.5} />
               <span className="absolute top-0 left-[14px] md:left-[18px] text-[14px] md:text-[16px] font-bold text-[#f08804]">
                 {totalItems}
               </span>
