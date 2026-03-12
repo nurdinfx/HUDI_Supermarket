@@ -1,6 +1,6 @@
 {
-  "name": "Hudi Supermarket",
-  "short_name": "Hudi Store",
+  "name": "Hudi_Supermarket",
+  "short_name": "Hudi_Supermarket",
   "description": "Premium supermarket delivery at your fingertips.",
   "start_url": "/",
   "display": "standalone",
