@@ -41,12 +41,16 @@ const allowedOrigins = [
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    const isAllowed = allowedOrigins.some(allowed => origin && origin.startsWith(allowed));
+    
+    // Check if origin is a local dev URL or a Hudi Supermarket Vercel deployment
+    const isAllowed = allowedOrigins.some(allowed => origin.startsWith(allowed)) || 
+                     (origin.includes('hudi-supermarket') && origin.endsWith('.vercel.app'));
+    
     if (isAllowed) {
       callback(null, true);
     } else {
       console.log('CORS blocked for origin:', origin);
-      callback(null, false); // Just block, don't throw 500
+      callback(null, false);
     }
   },
   credentials: true,
