@@ -1,23 +1,34 @@
 {
-  "name": "hudi-supermarket-root",
+  "name": "hudi_supermarket",
+  "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "admin",
-    "backend"
-  ],
   "scripts": {
-    "dev": "npm run dev -w frontend",
-    "build": "npm run build -w frontend -- --webpack && cp -rn frontend/.next .next && cp -rn frontend/public public",
-    "start": "npm run start -w frontend",
-    "lint": "npm run lint -w frontend"
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@stripe/react-stripe-js": "^5.6.1",
+    "@stripe/stripe-js": "^8.9.0",
+    "axios": "^1.13.6",
+    "clsx": "^2.1.1",
+    "firebase": "^12.10.0",
+    "framer-motion": "^12.35.1",
+    "lucide-react": "^0.577.0",
+    "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "next": "16.1.6"
+    "@tailwindcss/postcss": "^4",
+    "autoprefixer": "^10",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "postcss": "^8",
+    "postcss-import": "^15",
+    "tailwindcss": "^4"
   }
 }
