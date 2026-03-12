@@ -32,25 +32,25 @@ const allowedOrigins = [
   'http://127.0.0.1:3000', 
   'http://127.0.0.1:3001', 
   'http://127.0.0.1:3002',
+  'https://hudi-supermarket-ae6a.vercel.app',
+  'https://hudi-supermarket-admin.vercel.app',
   process.env.FRONTEND_URL,
   process.env.ADMIN_URL,
 ].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    
-    const isAllowed = allowedOrigins.some(allowed => origin.startsWith(allowed));
-    
+    const isAllowed = allowedOrigins.some(allowed => origin && origin.startsWith(allowed));
     if (isAllowed) {
       callback(null, true);
     } else {
-      console.log('Blocked by CORS:', origin);
-      callback(new Error('Not allowed by CORS'));
+      console.log('CORS blocked for origin:', origin);
+      callback(null, false); // Just block, don't throw 500
     }
   },
   credentials: true,
+  optionsSuccessStatus: 200,
 }));
 
 // Health check route
