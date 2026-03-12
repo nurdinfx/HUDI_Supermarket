@@ -34,6 +34,8 @@ const allowedOrigins = [
   'http://127.0.0.1:3002',
   'https://hudi-supermarket-ae6a.vercel.app',
   'https://hudi-supermarket-admin.vercel.app',
+  'https://hudi-supermarket.vercel.app',
+  'https://hudi-supermarket-uz9q.vercel.app',
   process.env.FRONTEND_URL,
   process.env.ADMIN_URL,
 ].filter(Boolean);
