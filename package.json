@@ -1,11 +1,16 @@
 {
   "name": "hudi-supermarket-root",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "admin",
+    "backend"
+  ],
   "scripts": {
-    "dev": "cd frontend && npm run dev",
-    "build": "cd frontend && npm run build -- --webpack",
-    "start": "cd frontend && npm start",
-    "lint": "cd frontend && npm run lint"
+    "dev": "npm run dev -w frontend",
+    "build": "npm run build -w frontend -- --webpack",
+    "start": "npm run start -w frontend",
+    "lint": "npm run lint -w frontend"
   },
   "dependencies": {
     "next": "16.1.6",
