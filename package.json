@@ -1,0 +1,12 @@
+{
+  "name": "hudi-supermarket-root",
+  "private": true,
+  "scripts": {
+    "install-all": "cd frontend && npm install",
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd frontend && npm start"
+  },
+  "dependencies": {
+    "next": "16.1.6"
+  }
+}
