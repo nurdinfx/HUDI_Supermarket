@@ -202,14 +202,17 @@ export default function ProductPage({ params }) {
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">Key Highlights</h3>
+                <h3 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">About this item</h3>
                 <ul className="space-y-3">
-                  {product.description?.split('.').filter(d => d.trim().length > 0).slice(0, 5).map((desc, i) => (
+                  {(product.description?.split(/[.!?]/).filter(d => d.trim().length > 2).slice(0, 5).length > 0 
+                    ? product.description.split(/[.!?]/).filter(d => d.trim().length > 2).slice(0, 5)
+                    : [product.description || "Premium quality product sourced for you."]
+                  ).map((desc, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm text-gray-600 leading-relaxed">
                       <div className="mt-1 bg-blue-100 p-0.5 rounded-full text-[#2563EB] shrink-0">
                         <Check size={12} strokeWidth={4} />
                       </div>
-                      {desc.trim()}.
+                      {desc.trim()}{desc.trim().endsWith('.') ? '' : '.'}
                     </li>
                   ))}
                 </ul>
