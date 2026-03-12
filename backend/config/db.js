@@ -9,7 +9,11 @@ const connectDB = async () => {
   };
 
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, options);
+    const uri = (process.env.MONGO_URI || '').trim();
+    if (!uri) {
+      throw new Error('MONGO_URI is missing from environment variables');
+    }
+    const conn = await mongoose.connect(uri, options);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Atlas Connection Error: ${error.message}`);

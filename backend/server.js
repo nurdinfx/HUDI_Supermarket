@@ -1,5 +1,7 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
@@ -17,7 +19,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import deliveryRoutes from './routes/deliveryRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
-dotenv.config();
+// Environment already loaded at top
 
 // Connect to database
 connectDB();
