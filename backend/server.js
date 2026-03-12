@@ -31,14 +31,22 @@ const allowedOrigins = [
   'http://localhost:3002', 
   'http://127.0.0.1:3000', 
   'http://127.0.0.1:3001', 
-  'http://127.0.0.1:3002'
-];
+  'http://127.0.0.1:3002',
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_URL,
+].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    const isAllowed = allowedOrigins.some(allowed => origin.startsWith(allowed));
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
+      console.log('Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
