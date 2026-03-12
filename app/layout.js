@@ -13,6 +13,7 @@ export const metadata = {
 
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
+import { WishlistProvider } from '@/context/WishlistContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import BottomNav from '@/components/BottomNav';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -34,15 +35,17 @@ export default function RootLayout({ children }) {
       <body className="bg-[#F8FAFC] min-h-screen text-gray-900 font-poppins antialiased pb-20 lg:pb-0">
         <AuthProvider>
           <NotificationProvider>
-            <CartProvider>
-              <Navbar />
-              <main className="max-w-full mx-auto">
-                {children}
-              </main>
-              <BottomNav />
-              <PWAInstallPrompt />
-              <Footer />
-            </CartProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <Navbar />
+                <main className="max-w-full mx-auto">
+                  {children}
+                </main>
+                <BottomNav />
+                <PWAInstallPrompt />
+                <Footer />
+              </CartProvider>
+            </WishlistProvider>
           </NotificationProvider>
         </AuthProvider>
       </body>

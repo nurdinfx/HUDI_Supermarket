@@ -132,6 +132,15 @@ export default function Navbar() {
             </div>
           </div>
 
+          {/* Wishlist */}
+          <Link href="/wishlist" className="hidden md:flex flex-col justify-center h-[50px] px-2 border border-transparent hover:border-white rounded-sm cursor-pointer transition-all leading-none ml-1 relative">
+            <span className="text-[12px] font-normal">Your</span>
+            <div className="flex items-center mt-0.5">
+              <span className="text-[14px] font-bold">Wishlist</span>
+              <Heart size={20} className="ml-1" />
+            </div>
+          </Link>
+
           {/* Cart */}
           <Link href="/cart" className="flex items-end h-[50px] px-2 border border-transparent hover:border-white rounded-sm cursor-pointer transition-all ml-1 relative group">
             <div className="relative">

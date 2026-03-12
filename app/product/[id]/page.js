@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useWishlist } from '@/context/WishlistContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -21,6 +22,7 @@ export default function ProductPage({ params }) {
   const [activeImage, setActiveImage] = useState(0);
   const { addToCart } = useCart();
   const { user } = useAuth();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -115,9 +117,17 @@ export default function ProductPage({ params }) {
               </div>
             )}
             
-            <button className="absolute top-6 right-6 bg-white/80 backdrop-blur-md p-2.5 rounded-full text-gray-500 hover:text-[#2563EB] shadow-sm z-20 border border-gray-100 transition-all">
-              <Share2 size={20} />
-            </button>
+            <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
+              <button 
+                onClick={() => isInWishlist(product._id) ? removeFromWishlist(product._id) : addToWishlist(product)}
+                className={`bg-white/80 backdrop-blur-md p-2.5 rounded-full shadow-sm border border-gray-100 transition-all ${isInWishlist(product._id) ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+              >
+                <Heart size={20} fill={isInWishlist(product._id) ? 'currentColor' : 'none'} />
+              </button>
+              <button className="bg-white/80 backdrop-blur-md p-2.5 rounded-full text-gray-500 hover:text-[#2563EB] shadow-sm border border-gray-100 transition-all">
+                <Share2 size={20} />
+              </button>
+            </div>
 
             <div className="w-full h-full relative group">
               <img 

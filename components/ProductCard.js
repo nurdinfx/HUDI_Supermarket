@@ -4,9 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, Heart, Star } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const renderStars = (rating) => {
     return Array(5).fill(0).map((_, i) => (
@@ -31,8 +33,11 @@ export default function ProductCard({ product }) {
       )}
       
       {/* Wishlist Button */}
-      <button className="absolute top-2 right-2 bg-white p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors z-10 shadow-sm opacity-0 group-hover:opacity-100">
-        <Heart size={18} />
+      <button 
+        onClick={() => isInWishlist(product._id) ? removeFromWishlist(product._id) : addToWishlist(product)}
+        className={`absolute top-2 right-2 bg-white p-1.5 rounded-full transition-all z-10 shadow-sm opacity-0 group-hover:opacity-100 ${isInWishlist(product._id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500 hover:bg-red-50'}`}
+      >
+        <Heart size={18} fill={isInWishlist(product._id) ? 'currentColor' : 'none'} />
       </button>
 
       {/* Product Image */}

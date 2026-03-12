@@ -70,10 +70,8 @@ export function NotificationProvider({ children }) {
       }
     };
 
-    if (firebaseConfig.apiKey) {
+    if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('AIzaSy')) {
       initNotifications();
-    } else {
-      console.warn('Firebase Notifications: Credentials not found (NEXT_PUBLIC_FIREBASE_API_KEY). Notifications disabled.');
     }
   }, [user]);
 
