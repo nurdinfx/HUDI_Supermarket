@@ -17,7 +17,7 @@ export default function ProductPage({ params }) {
   React.useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${id}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://hudi-supermarket.onrender.com/api'}/products/${id}`);
         const data = await res.json();
         setProduct(data);
       } catch (error) {

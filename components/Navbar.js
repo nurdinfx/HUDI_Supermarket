@@ -12,6 +12,7 @@ export default function Navbar() {
   const [searchCategory, setSearchCategory] = useState('');
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
 
   const handleSearch = (e) => {
@@ -37,18 +38,27 @@ export default function Navbar() {
   return (
     <header className="w-full font-sans text-white select-none">
       {/* Top Bar - Main Navigation */}
-      <div className="bg-[#131921] h-[60px] flex items-center px-4 gap-1">
+      <div className="bg-[#131921] h-[60px] md:h-[65px] flex items-center px-4 gap-1">
         
+        {/* Mobile Menu Icon */}
+        <button 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden p-2 hover:border border-white rounded-sm"
+        >
+          <Menu size={24} />
+        </button>
+
         {/* Logo */}
-        <Link href="/" className="flex items-center h-[50px] px-2 border border-transparent hover:border-white rounded-sm transition-all group">
+        <Link href="/" className="flex items-center h-[50px] px-2 border border-transparent hover:border-white rounded-sm transition-all group shrink-0">
           <div className="flex flex-col leading-none">
-            <span className="text-[22px] font-black tracking-tight">Hudi-Supermarket</span>
-            <span className="text-[12px] text-[#febd69] font-bold self-end -mt-1">.so</span>
+            <span className="text-[18px] md:text-[22px] font-black tracking-tight">Hudi</span>
+            <span className="hidden sm:inline text-[22px] font-black tracking-tight">-Supermarket</span>
+            <span className="text-[10px] md:text-[12px] text-[#febd69] font-bold self-end -mt-1">.so</span>
           </div>
         </Link>
 
-        {/* Deliver To */}
-        <div className="flex items-center h-[50px] px-2 ml-1 border border-transparent hover:border-white rounded-sm cursor-pointer transition-all">
+        {/* Deliver To - Hidden on mobile */}
+        <div className="hidden lg:flex items-center h-[50px] px-2 ml-1 border border-transparent hover:border-white rounded-sm cursor-pointer transition-all shrink-0">
           <MapPin size={18} className="mt-2 mr-0.5" />
           <div className="flex flex-col leading-none">
             <span className="text-[12px] text-[#ccc] font-normal">Delivering to Mogadishu</span>
@@ -56,11 +66,11 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="flex-1 flex items-center h-[40px] ml-2 group">
+        {/* Search Bar - Hidden on very small screens or compressed */}
+        <div className="hidden sm:flex flex-1 items-center h-[40px] ml-2 group min-w-[100px]">
           <form onSubmit={handleSearch} className="flex w-full h-full rounded-[4px] overflow-hidden focus-within:ring-[3px] focus-within:ring-[#f3a847] transition-shadow">
-            {/* Category Dropdown */}
-            <div className="h-full relative flex items-center bg-[#e6e6e6] hover:bg-[#d4d4d4] text-[#555] border-r border-[#bbb] cursor-pointer">
+            {/* Category Dropdown - Hidden on tablets */}
+            <div className="hidden md:flex h-full relative items-center bg-[#e6e6e6] hover:bg-[#d4d4d4] text-[#555] border-r border-[#bbb] cursor-pointer">
               <select 
                 value={searchCategory}
                 onChange={(e) => setSearchCategory(e.target.value)}
@@ -72,7 +82,7 @@ export default function Navbar() {
                 ))}
               </select>
               <div className="flex items-center px-4 whitespace-nowrap text-[12px]">
-                <span>{searchCategory && searchCategory !== 'All Departments' ? searchCategory.slice(0, 12) + (searchCategory.length > 12 ? '...' : '') : 'All'}</span>
+                <span>{searchCategory && searchCategory !== 'All Departments' ? searchCategory.slice(0, 10) + (searchCategory.length > 10 ? '..' : '') : 'All'}</span>
                 <ChevronDown size={14} className="ml-1 mt-0.5" />
               </div>
             </div>
@@ -82,33 +92,27 @@ export default function Navbar() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Hudi-Supermarket"
-              className="flex-1 px-4 text-[15px] text-gray-900 border-none focus:ring-0 outline-none h-full"
+              placeholder="Search Hudi"
+              className="flex-1 px-4 text-[15px] text-gray-900 border-none focus:ring-0 outline-none h-full w-full"
             />
             
             {/* Search Button */}
-            <button type="submit" className="bg-[#febd69] hover:bg-[#f3a847] w-[45px] h-full flex items-center justify-center transition-colors">
-              <Search size={24} className="text-[#333]" strokeWidth={2.5} />
+            <button type="submit" className="bg-[#febd69] hover:bg-[#f3a847] w-[45px] h-full flex items-center justify-center transition-colors shrink-0">
+              <Search size={22} className="text-[#333]" strokeWidth={2.5} />
             </button>
           </form>
         </div>
 
         {/* Right Nav Sections */}
-        <div className="flex items-center h-full ml-2">
+        <div className="flex items-center h-full ml-auto">
           
-          {/* Language / Flag */}
-          <div className="flex items-center h-[50px] px-2 border border-transparent hover:border-white rounded-sm cursor-pointer transition-all gap-1">
-            <span className="text-[18px]">🇸🇴</span>
-            <span className="text-[14px] font-bold uppercase tracking-tighter">SOM</span>
-            <ChevronDown size={12} className="text-[#ccc] mt-1" />
-          </div>
-
-          {/* Account & Lists */}
+          {/* Account & Lists - Icon only on mobile */}
           <div className="group relative flex flex-col justify-center h-[50px] px-2 border border-transparent hover:border-white rounded-sm cursor-pointer transition-all leading-none ml-1">
-            <span className="text-[12px] font-normal">Hello, {user ? user.name.split(' ')[0] : 'sign in'}</span>
+            <span className="hidden md:inline text-[12px] font-normal">Hello, {user ? user.name.split(' ')[0] : 'sign in'}</span>
             <div className="flex items-center mt-0.5">
-              <span className="text-[14px] font-bold">Account & Lists</span>
-              <ChevronDown size={12} className="text-[#ccc] ml-0.5 mt-0.5" />
+              <span className="hidden md:inline text-[14px] font-bold">Account</span>
+              <User className="md:hidden" size={24} />
+              <ChevronDown size={12} className="text-[#ccc] ml-0.5 mt-0.5 hidden md:inline" />
             </div>
             
             {/* Dropdown overlay */}
@@ -128,25 +132,68 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Returns & Orders */}
-          <Link href="/orders" className="flex flex-col justify-center h-[50px] px-2 border border-transparent hover:border-white rounded-sm cursor-pointer transition-all leading-none ml-1">
-            <span className="text-[12px] font-normal">Returns</span>
-            <span className="text-[14px] font-bold">& Orders</span>
-          </Link>
-
           {/* Cart */}
           <Link href="/cart" className="flex items-end h-[50px] px-2 border border-transparent hover:border-white rounded-sm cursor-pointer transition-all ml-1 relative group">
             <div className="relative">
-              <ShoppingCart size={38} className="text-white" strokeWidth={1.5} />
-              <span className="absolute top-0 left-[18px] text-[16px] font-bold text-[#f08804]">
+              <ShoppingCart size={32} md:size={38} className="text-white" strokeWidth={1.5} />
+              <span className="absolute top-0 left-[14px] md:left-[18px] text-[14px] md:text-[16px] font-bold text-[#f08804]">
                 {totalItems}
               </span>
             </div>
-            <span className="text-[14px] font-bold mb-1 ml-0.5">Cart</span>
+            <span className="hidden sm:inline text-[14px] font-bold mb-1 ml-0.5">Cart</span>
           </Link>
 
         </div>
       </div>
+
+      {/* Mobile Search Bar - Only visible on smallest screens */}
+      <div className="sm:hidden bg-[#131921] px-4 pb-3">
+        <form onSubmit={handleSearch} className="flex w-full h-[40px] rounded-[4px] overflow-hidden">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search Hudi"
+              className="flex-1 px-4 text-[15px] text-gray-900 border-none focus:ring-0 outline-none h-full"
+            />
+            <button type="submit" className="bg-[#febd69] w-[45px] h-full flex items-center justify-center">
+              <Search size={22} className="text-[#333]" />
+            </button>
+        </form>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 bg-black/60 z-[200] lg:hidden" onClick={() => setIsMenuOpen(false)}>
+           <div className="w-[80%] max-w-[300px] h-full bg-white text-gray-900 animate-in slide-in-from-left duration-300" onClick={e => e.stopPropagation()}>
+              <div className="bg-[#232f3e] text-white p-4 flex items-center gap-3">
+                 <User size={24} />
+                 <span className="font-bold">Hello, {user ? user.name : 'Sign In'}</span>
+              </div>
+              <div className="p-4 space-y-6">
+                 <div>
+                    <h3 className="text-lg font-bold mb-3">Shop By Category</h3>
+                    <div className="flex flex-col gap-3">
+                       {categories.slice(0, 8).map(cat => (
+                          <Link key={cat} href={`/shop?category=${cat}`} onClick={() => setIsMenuOpen(false)} className="text-sm hover:text-orange-500">{cat}</Link>
+                       ))}
+                       <Link href="/shop" onClick={() => setIsMenuOpen(false)} className="text-sm font-bold text-blue-600">See All Categories</Link>
+                    </div>
+                 </div>
+                 <hr />
+                 <div>
+                    <h3 className="text-lg font-bold mb-3">Help & Settings</h3>
+                    <div className="flex flex-col gap-3">
+                       <Link href="/profile" onClick={() => setIsMenuOpen(false)} className="text-sm">Your Account</Link>
+                       <Link href="/orders" onClick={() => setIsMenuOpen(false)} className="text-sm">Your Orders</Link>
+                       <Link href="/customer-service" onClick={() => setIsMenuOpen(false)} className="text-sm">Customer Service</Link>
+                       {user && <button onClick={() => { logout(); setIsMenuOpen(false); }} className="text-sm text-red-600 text-left">Sign Out</button>}
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+      )}
 
       {/* Bottom Bar - Sub Navigation */}
       <div className="bg-[#232f3e] h-[39px] flex items-center px-4 overflow-x-auto no-scrollbar">

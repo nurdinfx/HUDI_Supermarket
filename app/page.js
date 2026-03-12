@@ -1,7 +1,7 @@
 import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
 import { ArrowRight, Zap, TrendingUp, Tag, ShieldCheck, Truck, CreditCard } from 'lucide-react';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hudi-supermarket.onrender.com/api';
 
 async function getData() {
   try {

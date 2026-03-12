@@ -151,12 +151,12 @@ export default function PaymentsPage() {
                  {selectedOrder.paymentProofImage ? (
                    <div className="space-y-4 w-full">
                      <img 
-                      src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${selectedOrder.paymentProofImage}`} 
+                      src={`${(process.env.NEXT_PUBLIC_API_URL || 'https://hudi-supermarket.onrender.com/api').replace('/api', '')}${selectedOrder.paymentProofImage}`} 
                       alt="Payment Proof" 
                       className="max-h-[500px] w-auto mx-auto border-4 border-white shadow-lg rounded-xl"
                      />
                      <a 
-                      href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${selectedOrder.paymentProofImage}`} 
+                      href={`${(process.env.NEXT_PUBLIC_API_URL || 'https://hudi-supermarket.onrender.com/api').replace('/api', '')}${selectedOrder.paymentProofImage}`} 
                       target="_blank" 
                       className="flex items-center justify-center gap-2 text-sm text-[#2563EB] font-bold hover:underline"
                      >
