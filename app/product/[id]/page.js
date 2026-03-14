@@ -70,6 +70,30 @@ export default function ProductPage({ params }) {
     fetchProduct();
   }, [id]);
 
+  const hasVariants = product?.variants && product.variants.length > 0;
+  const availableSizes = hasVariants ? [...new Set(product.variants.map(v => v.sizeLabel.trim()))] : [];
+  
+  // Filter colors based on selected size, or show all if none selected
+  const availableColors = hasVariants 
+    ? [...new Set(product.variants.filter(v => !selectedSize || v.sizeLabel.trim() === selectedSize.trim()).map(v => v.color.trim()))] 
+    : [];
+
+  const selectedVariant = hasVariants && selectedSize && selectedColor 
+    ? product.variants.find(v => v.sizeLabel.trim() === selectedSize.trim() && v.color.trim() === selectedColor.trim()) 
+    : null;
+    
+  // Auto-select if only one option exists
+  useEffect(() => {
+    if (hasVariants) {
+      if (!selectedSize && availableSizes.length === 1) {
+        setSelectedSize(availableSizes[0]);
+      }
+      if (selectedSize && !selectedColor && availableColors.length === 1) {
+        setSelectedColor(availableColors[0]);
+      }
+    }
+  }, [hasVariants, availableSizes, availableColors, selectedSize, selectedColor]);
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 animate-pulse">
@@ -107,31 +131,6 @@ export default function ProductPage({ params }) {
       </div>
     );
   }
-
-
-  const hasVariants = product.variants && product.variants.length > 0;
-  const availableSizes = hasVariants ? [...new Set(product.variants.map(v => v.sizeLabel.trim()))] : [];
-  
-  // Filter colors based on selected size, or show all if none selected
-  const availableColors = hasVariants 
-    ? [...new Set(product.variants.filter(v => !selectedSize || v.sizeLabel.trim() === selectedSize.trim()).map(v => v.color.trim()))] 
-    : [];
-
-  const selectedVariant = hasVariants && selectedSize && selectedColor 
-    ? product.variants.find(v => v.sizeLabel.trim() === selectedSize.trim() && v.color.trim() === selectedColor.trim()) 
-    : null;
-    
-  // Auto-select if only one option exists
-  useEffect(() => {
-    if (hasVariants) {
-      if (!selectedSize && availableSizes.length === 1) {
-        setSelectedSize(availableSizes[0]);
-      }
-      if (selectedSize && !selectedColor && availableColors.length === 1) {
-        setSelectedColor(availableColors[0]);
-      }
-    }
-  }, [hasVariants, availableSizes, availableColors, selectedSize, selectedColor]);
 
   // Current available stock to limit qty
   const currentStock = hasVariants 
