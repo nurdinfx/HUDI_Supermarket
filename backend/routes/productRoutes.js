@@ -9,16 +9,16 @@ import {
 } from '../controllers/productController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
-const router = express.Router();
+// Most specific routes first
+router.get('/ping', (req, res) => res.json({ message: 'Product routes are active' }));
+router.post('/:id/reviews', protect, createProductReview);
 
-router.route('/').get(getProducts).post(protect, admin, createProduct);
+// Standard product routes
+router.get('/', getProducts);
+router.post('/', protect, admin, createProduct);
 
-// Ensure the most specific routes are first
-router.route('/:id/reviews').post(protect, createProductReview);
-
-router.route('/:id')
-  .get(getProductById)
-  .put(updateProduct)
-  .delete(protect, admin, deleteProduct);
+router.get('/:id', getProductById);
+router.put('/:id', protect, admin, updateProduct);
+router.delete('/:id', protect, admin, deleteProduct);
 
 export default router;

@@ -89,6 +89,8 @@ export default function ProductPage({ params }) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hudi-supermarket.onrender.com/api';
       const token = localStorage.getItem('token');
       
+      console.log('Submitting review to:', `${apiUrl}/products/${id}/reviews`);
+      
       const res = await fetch(`${apiUrl}/products/${id}/reviews`, {
         method: 'POST',
         headers: {
@@ -98,6 +100,8 @@ export default function ProductPage({ params }) {
         body: JSON.stringify({ rating, comment })
       });
 
+      console.log('Review response status:', res.status);
+      
       if (res.ok) {
         setReviewSuccess(true);
         setComment('');
@@ -106,9 +110,11 @@ export default function ProductPage({ params }) {
         setTimeout(() => setReviewSuccess(false), 5000);
       } else {
         const errorData = await res.json();
-        alert(errorData.message || 'Error submitting review');
+        console.error('Review error data:', errorData);
+        alert(errorData.message || `Error ${res.status}: Not Found`);
       }
     } catch (err) {
+      console.error('Network error during review:', err);
       alert('Network error submitting review');
     } finally {
       setReviewLoading(false);
