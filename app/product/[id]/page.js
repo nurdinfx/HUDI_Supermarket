@@ -38,6 +38,7 @@ export default function ProductPage({ params }) {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [activeImage, setActiveImage] = useState(0);
+  const [addedToCart, setAddedToCart] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -109,17 +110,29 @@ export default function ProductPage({ params }) {
 
 
   const hasVariants = product.variants && product.variants.length > 0;
-  const availableSizes = hasVariants ? [...new Set(product.variants.map(v => v.sizeLabel))] : [];
+  const availableSizes = hasVariants ? [...new Set(product.variants.map(v => v.sizeLabel.trim()))] : [];
   
   // Filter colors based on selected size, or show all if none selected
   const availableColors = hasVariants 
-    ? [...new Set(product.variants.filter(v => !selectedSize || v.sizeLabel === selectedSize).map(v => v.color))] 
+    ? [...new Set(product.variants.filter(v => !selectedSize || v.sizeLabel.trim() === selectedSize.trim()).map(v => v.color.trim()))] 
     : [];
 
   const selectedVariant = hasVariants && selectedSize && selectedColor 
-    ? product.variants.find(v => v.sizeLabel === selectedSize && v.color === selectedColor) 
+    ? product.variants.find(v => v.sizeLabel.trim() === selectedSize.trim() && v.color.trim() === selectedColor.trim()) 
     : null;
     
+  // Auto-select if only one option exists
+  useEffect(() => {
+    if (hasVariants) {
+      if (!selectedSize && availableSizes.length === 1) {
+        setSelectedSize(availableSizes[0]);
+      }
+      if (selectedSize && !selectedColor && availableColors.length === 1) {
+        setSelectedColor(availableColors[0]);
+      }
+    }
+  }, [hasVariants, availableSizes, availableColors, selectedSize, selectedColor]);
+
   // Current available stock to limit qty
   const currentStock = hasVariants 
     ? (selectedVariant ? selectedVariant.stock : 0) 
@@ -157,8 +170,12 @@ export default function ProductPage({ params }) {
     }
     
     addToCart(product, qty, selectedSize, selectedColor);
+    
     if (redirectCheckout) {
       router.push(user ? '/checkout' : '/login?redirect=/checkout');
+    } else {
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 3000);
     }
   };
 
@@ -399,10 +416,16 @@ export default function ProductPage({ params }) {
                     <span className="text-2xl font-black text-[#2563EB]">${totalPrice}</span>
                   </div>
 
+                  {addedToCart && (
+                    <div className="bg-green-100 text-green-800 p-3 rounded-xl border border-green-200 text-sm font-bold animate-in fade-in slide-in-from-top-2 text-center">
+                      <Check size={16} className="inline mr-2" /> Added to cart successfully!
+                    </div>
+                  )}
+
                   <button 
                     onClick={() => handleAddToCart(false)}
                     disabled={(hasVariants ? !selectedVariant || selectedVariant.stock === 0 : product.countInStock === 0)}
-                    className="w-full bg-[#fae8b2] hover:bg-[#F3C235] text-gray-900 border-2 border-[#F3C235] py-4 rounded-2xl font-black text-sm transition-all shadow-lg hover:shadow-yellow-100 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                    className="w-full bg-[#fae8b2] hover:bg-[#F3C235] text-gray-900 border-2 border-[#F3C235] py-4 rounded-2xl font-black text-sm transition-all shadow-lg hover:shadow-yellow-100 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ShoppingCart size={20} /> ADD TO CART
                   </button>
@@ -410,7 +433,7 @@ export default function ProductPage({ params }) {
                   <button 
                     onClick={() => handleAddToCart(true)}
                     disabled={(hasVariants ? !selectedVariant || selectedVariant.stock === 0 : product.countInStock === 0)}
-                    className="w-full bg-[#131921] hover:bg-black text-white py-4 rounded-2xl font-black text-sm transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                    className="w-full bg-[#131921] hover:bg-black text-white py-4 rounded-2xl font-black text-sm transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     BUY NOW
                   </button>
