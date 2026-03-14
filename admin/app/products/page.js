@@ -8,6 +8,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -176,6 +177,13 @@ export default function ProductsPage() {
           </select>
         </div>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl text-sm font-medium flex items-center gap-3">
+          <span className="text-xl">⚠️</span> {error}
+          <button onClick={fetchData} className="ml-auto underline hover:text-red-800">Retry</button>
+        </div>
+      )}
 
       {/* Products Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
