@@ -117,8 +117,6 @@ export default function ProductsPage() {
         discount: Number(formData.discount || 0)
       };
 
-      console.log('Final Payload to Backend:', JSON.stringify(payload, null, 2));
-
       if (currentProduct) {
         await updateAdminProduct(currentProduct._id, payload);
       } else {
