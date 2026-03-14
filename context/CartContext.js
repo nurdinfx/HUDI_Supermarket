@@ -23,18 +23,22 @@ export function CartProvider({ children }) {
   }, [cartItems]);
 
   const addToCart = (product, qty = 1, size = '', color = '') => {
+    const s = size || '';
+    const c = color || '';
     setCartItems(prev => {
-      const existItem = prev.find(x => x._id === product._id && x.size === size && x.color === color);
+      const existItem = prev.find(x => x._id === product._id && (x.size || '') === s && (x.color || '') === c);
       if (existItem) {
-        return prev.map(x => (x._id === product._id && x.size === size && x.color === color) ? { ...x, qty: x.qty + qty } : x);
+        return prev.map(x => (x._id === product._id && (x.size || '') === s && (x.color || '') === c) ? { ...x, qty: x.qty + qty } : x);
       } else {
-        return [...prev, { ...product, qty, size, color }];
+        return [...prev, { ...product, qty, size: s, color: c }];
       }
     });
   };
 
   const removeFromCart = (id, size = '', color = '') => {
-    setCartItems(prev => prev.filter(x => !(x._id === id && x.size === size && x.color === color)));
+    const s = size || '';
+    const c = color || '';
+    setCartItems(prev => prev.filter(x => !(x._id === id && (x.size || '') === s && (x.color || '') === c)));
   };
 
   const clearCart = () => {

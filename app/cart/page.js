@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
   const { 
-    cartItems, addToCart, removeFromCart, itemsPrice,
+    cartItems, addToCart, removeFromCart, clearCart, itemsPrice,
     discount, setDiscount, appliedCoupon, setAppliedCoupon 
   } = useCart();
   const { user } = useAuth();
@@ -44,7 +44,17 @@ export default function CartPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-      <Link href="/shop" className="text-[#2563EB] hover:underline text-sm font-medium mb-6 inline-block">← Continue Shopping</Link>
+      <div className="flex justify-between items-center mb-6">
+        <Link href="/shop" className="text-[#2563EB] hover:underline text-sm font-medium">← Continue Shopping</Link>
+        {cartItems.length > 0 && (
+          <button 
+            onClick={() => { if(window.confirm('Are you sure you want to clear your bag?')) clearCart(); }}
+            className="text-red-500 hover:text-red-700 text-sm font-bold flex items-center gap-1 transition"
+          >
+            <Trash2 size={16} /> Clear Bag
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Cart Items */}
