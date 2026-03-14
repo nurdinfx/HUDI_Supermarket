@@ -55,15 +55,13 @@ export default function AdminLayoutWrapper({ children }) {
           ))}
           
           <div className="pt-6 mt-6 border-t border-gray-100">
-            <a 
-              href="http://localhost:3000" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <Link 
+              href="/" 
               className="flex items-center gap-3 px-4 py-3 rounded-2xl text-blue-600 hover:bg-blue-50 font-bold transition-all"
             >
               <span className="text-xl">🛒</span> 
               <span className="text-sm">Storefront</span>
-            </a>
+            </Link>
           </div>
         </nav>
         

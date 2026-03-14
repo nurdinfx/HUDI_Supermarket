@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hudi-supermarket.onrender.com/api';
+let API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hudi-supermarket.onrender.com/api';
+
+// Robustness: Ensure API_URL ends with /api if it doesn't already
+if (API_URL && !API_URL.endsWith('/api') && API_URL.includes('onrender.com')) {
+  API_URL = `${API_URL}/api`;
+} else if (API_URL && !API_URL.endsWith('/api') && !API_URL.includes('localhost')) {
+  // If it's a domain without /api, it likely needs it
+  API_URL = API_URL.replace(/\/$/, '') + '/api';
+}
 
 const adminApi = axios.create({
   baseURL: API_URL,
