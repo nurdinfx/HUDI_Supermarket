@@ -55,7 +55,7 @@ export default function ProductsPage() {
         price: product.price,
         countInStock: product.countInStock || '',
         category: product.category?._id || product.category || '',
-        image: product.images?.[0] || '',
+        image: (product.images && product.images.length > 0) ? product.images.join(', ') : (product.image || ''),
         description: product.description || '',
         brand: product.brand || '',
         variants: product.variants || []
@@ -112,9 +112,12 @@ export default function ProductsPage() {
 
     try {
       const calculatedStock = formData.variants.reduce((acc, v) => acc + (Number(v.stock) || 0), 0);
+      const imagesArray = formData.image.split(',').map(url => extractImageUrl(url.trim())).filter(url => url !== '');
+      
       const payload = { 
         ...formData, 
-        image: extractImageUrl(formData.image),
+        images: imagesArray.length > 0 ? imagesArray : ['/images/sample.jpg'],
+        image: imagesArray[0] || '/images/sample.jpg',
         countInStock: calculatedStock,
         price: Number(formData.price),
         discount: Number(formData.discount || 0)
@@ -335,15 +338,15 @@ export default function ProductsPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Image URL</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Images (Comma separated URLs)</label>
                     <div className="relative">
-                      <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                      <input 
-                        type="text" 
+                      <ImageIcon className="absolute left-3 top-3 text-gray-400" size={16} />
+                      <textarea 
+                        rows="3"
                         className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all" 
                         value={formData.image}
                         onChange={(e) => setFormData({...formData, image: e.target.value})}
-                        placeholder="https://example.com/image.jpg"
+                        placeholder="https://img1.jpg, https://img2.jpg..."
                       />
                     </div>
                   </div>
