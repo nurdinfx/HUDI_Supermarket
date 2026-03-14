@@ -19,8 +19,10 @@ export default function ProductsPage() {
     category: '',
     image: '',
     description: '',
-    brand: ''
+    brand: '',
+    variants: []
   });
+  const [newVariant, setNewVariant] = useState({ sizeType: 'alphabetical', sizeLabel: '', color: '', stock: '' });
 
   useEffect(() => {
     fetchData();
@@ -48,11 +50,12 @@ export default function ProductsPage() {
       setFormData({
         name: product.name,
         price: product.price,
-        countInStock: product.countInStock,
+        countInStock: product.countInStock || '',
         category: product.category?._id || product.category || '',
         image: product.images?.[0] || '',
         description: product.description || '',
-        brand: product.brand || ''
+        brand: product.brand || '',
+        variants: product.variants || []
       });
     } else {
       setCurrentProduct(null);
@@ -63,9 +66,11 @@ export default function ProductsPage() {
         category: '',
         image: '',
         description: '',
-        brand: ''
+        brand: '',
+        variants: []
       });
     }
+    setNewVariant({ sizeType: 'alphabetical', sizeLabel: '', color: '', stock: '' });
     setIsModalOpen(true);
   };
 
@@ -96,8 +101,24 @@ export default function ProductsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Check for empty variants
+    if (!formData.variants || formData.variants.length === 0) {
+      alert('Please add at least one variant before saving the product.');
+      return;
+    }
+
     try {
-      const payload = { ...formData, image: extractImageUrl(formData.image) };
+      const calculatedStock = formData.variants.reduce((acc, v) => acc + (Number(v.stock) || 0), 0);
+      const payload = { 
+        ...formData, 
+        image: extractImageUrl(formData.image),
+        countInStock: calculatedStock,
+        price: Number(formData.price),
+        discount: Number(formData.discount || 0)
+      };
+
+      console.log('Final Payload to Backend:', JSON.stringify(payload, null, 2));
+
       if (currentProduct) {
         await updateAdminProduct(currentProduct._id, payload);
       } else {
@@ -107,6 +128,8 @@ export default function ProductsPage() {
       fetchData();
     } catch (error) {
       console.error('Error saving product:', error);
+      const message = error.response?.data?.message || error.message || 'Unknown error occurred';
+      alert(`Error saving product: ${message}`);
     }
   };
 
@@ -287,15 +310,15 @@ export default function ProductsPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Stock Amount</label>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Total Stock</label>
                       <div className="relative">
                         <Package className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                         <input 
                           type="number" 
-                          className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all" 
-                          value={formData.countInStock}
-                          onChange={(e) => setFormData({...formData, countInStock: e.target.value})}
-                          required
+                          className="w-full bg-gray-100 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none cursor-not-allowed text-gray-500" 
+                          value={formData.variants.reduce((acc, v) => acc + (Number(v.stock) || 0), 0)}
+                          readOnly
+                          title="Computed automatically from variants"
                         />
                       </div>
                     </div>
@@ -324,6 +347,87 @@ export default function ProductsPage() {
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                     />
+                  </div>
+                </div>
+
+                {/* Variants Section */}
+                <div className="md:col-span-2 mt-4 border-t border-gray-100 pt-6">
+                  <h3 className="text-sm font-bold text-gray-900 mb-4 tracking-wide uppercase">Product Variants</h3>
+                  
+                  {formData.variants.length > 0 && (
+                    <div className="mb-4 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="py-2 px-4 font-semibold text-gray-600">Size</th>
+                            <th className="py-2 px-4 font-semibold text-gray-600">Color</th>
+                            <th className="py-2 px-4 font-semibold text-gray-600">Stock</th>
+                            <th className="py-2 px-4 text-right"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {formData.variants.map((v, idx) => (
+                            <tr key={idx} className="hover:bg-white transition">
+                              <td className="py-2 px-4 font-medium">{v.sizeLabel}</td>
+                              <td className="py-2 px-4">{v.color}</td>
+                              <td className="py-2 px-4">{v.stock}</td>
+                              <td className="py-2 px-4 text-right">
+                                <button type="button" onClick={() => {
+                                  const newV = [...formData.variants];
+                                  newV.splice(idx, 1);
+                                  setFormData({...formData, variants: newV});
+                                }} className="text-red-500 hover:text-red-700 p-1">
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+                      <div className="sm:col-span-1">
+                         <label className="block text-xs font-bold text-gray-500 mb-1">Type</label>
+                         <select className="w-full border py-2 px-2 rounded-lg text-sm bg-white outline-none" value={newVariant.sizeType} onChange={(e) => setNewVariant({...newVariant, sizeType: e.target.value, sizeLabel: ''})}>
+                           <option value="alphabetical">Alpha</option>
+                           <option value="numeric">Numeric</option>
+                         </select>
+                      </div>
+                      <div className="sm:col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Size</label>
+                        {newVariant.sizeType === 'alphabetical' ? (
+                          <select className="w-full border py-2 px-2 rounded-lg text-sm bg-white outline-none" value={newVariant.sizeLabel} onChange={(e) => setNewVariant({...newVariant, sizeLabel: e.target.value})}>
+                            <option value="">Select</option>
+                            {['XXXS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', '6XL', '7XL', '8XL'].map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        ) : (
+                          <input type="number" min="1" max="80" className="w-full border py-2 px-2 rounded-lg text-sm bg-white outline-none" placeholder="1-80" value={newVariant.sizeLabel} onChange={(e) => setNewVariant({...newVariant, sizeLabel: e.target.value})} />
+                        )}
+                      </div>
+                      <div className="sm:col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Color</label>
+                        <select className="w-full border py-2 px-2 rounded-lg text-sm bg-white outline-none" value={newVariant.color} onChange={(e) => setNewVariant({...newVariant, color: e.target.value})}>
+                            <option value="">Select</option>
+                            {['cadaan', 'madow', 'casaan', 'buluug', 'cagaar', 'buni', 'buluug-maari', 'huruud', 'liimi', 'casuus'].map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div className="sm:col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Stock</label>
+                        <input type="number" min="0" className="w-full border py-2 px-2 rounded-lg text-sm bg-white outline-none" placeholder="Qty" value={newVariant.stock} onChange={(e) => setNewVariant({...newVariant, stock: e.target.value})} />
+                      </div>
+                      <div className="sm:col-span-1">
+                        <button type="button" onClick={() => {
+                          if(!newVariant.sizeLabel || !newVariant.color || newVariant.stock === '') return alert('Fill all variant fields');
+                          setFormData({...formData, variants: [...formData.variants, {sizeLabel: newVariant.sizeLabel, color: newVariant.color, stock: Number(newVariant.stock)}]});
+                          setNewVariant({...newVariant, sizeLabel: '', color: '', stock: ''});
+                        }} className="w-full bg-[#2563EB] text-white hover:bg-blue-700 font-bold py-2 rounded-lg text-sm transition focus:outline-none shadow-sm">
+                          Add Variant
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

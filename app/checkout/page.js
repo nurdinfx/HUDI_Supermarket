@@ -89,9 +89,11 @@ export default function CheckoutPage() {
         orderItems: cartItems.map(item => ({
           name: item.name,
           qty: item.qty,
-          image: item.images?.[0] || '/placeholder.svg',
+          image: item.images?.[0] || item.image || '/placeholder.svg',
           price: item.price,
-          product: item._id
+          product: item._id,
+          size: item.size || 'N/A',
+          color: item.color || 'N/A'
         })),
         shippingAddress: address,
         paymentMethod: payment,

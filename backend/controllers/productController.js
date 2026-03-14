@@ -57,7 +57,12 @@ const getProductById = asyncHandler(async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, image, images, category, countInStock, discount, isFeatured, isTrending } = req.body;
+  const { name, price, description, image, images, category, countInStock, discount, isFeatured, isTrending, variants } = req.body;
+
+  // We allow variants with 0 stock now for professional inventory management
+  const calculatedStock = Array.isArray(variants) 
+    ? variants.reduce((acc, variant) => acc + (Number(variant.stock) || 0), 0)
+    : (Number(countInStock) || 0);
 
   const product = new Product({
     name: name || 'Sample name',
@@ -65,7 +70,8 @@ const createProduct = asyncHandler(async (req, res) => {
     user: req.user._id,
     images: images || (image ? [image] : ['/images/sample.jpg']),
     category: category || null,
-    countInStock: countInStock || 0,
+    countInStock: calculatedStock,
+    variants: variants || [],
     numReviews: 0,
     description: description || 'Sample description',
     discount: discount || 0,
@@ -97,30 +103,50 @@ const createProduct = asyncHandler(async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 const updateProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, image, images, category, countInStock, discount, isFeatured, isTrending } = req.body;
+  console.log('Update Product Request:', { id: req.params.id, body: req.body });
+  const { name, price, description, image, images, category, countInStock, discount, isFeatured, isTrending, variants } = req.body;
 
   const product = await Product.findById(req.params.id);
 
   if (product) {
-    product.name = name;
-    product.price = price;
-    product.description = description;
-    
-    // Handle both single 'image' and 'images' array
-    if (images) {
-      product.images = images;
-    } else if (image) {
-      product.images = [image];
-    }
-    
-    product.category = category;
-    product.countInStock = countInStock;
-    product.discount = discount;
-    if (isFeatured !== undefined) product.isFeatured = isFeatured;
-    if (isTrending !== undefined) product.isTrending = isTrending;
+    console.log('Found product:', product._id);
+    try {
+      // Allow products without variants if they have a flat stock, but variants are preferred
+      const hasVariants = Array.isArray(variants) && variants.length > 0;
+      
+      console.log('Calculating total stock...');
+      const calculatedStock = hasVariants
+        ? variants.reduce((acc, variant) => acc + (Number(variant.stock) || 0), 0)
+        : (countInStock !== undefined ? Number(countInStock) : product.countInStock);
+      
+      console.log('Calculated stock:', calculatedStock);
 
-    const updatedProduct = await product.save();
-    res.json(updatedProduct);
+      product.name = name || product.name;
+      product.price = price !== undefined ? Number(price) : product.price;
+      product.description = description || product.description;
+      
+      if (images) {
+        product.images = images;
+      } else if (image) {
+        product.images = [image];
+      }
+      
+      product.category = category || product.category;
+      product.countInStock = calculatedStock;
+      product.variants = variants || product.variants;
+      product.discount = discount !== undefined ? Number(discount) : product.discount;
+      if (isFeatured !== undefined) product.isFeatured = isFeatured;
+      if (isTrending !== undefined) product.isTrending = isTrending;
+
+      console.log('Saving product...');
+      const updatedProduct = await product.save();
+      console.log('Product saved successfully:', updatedProduct._id);
+      res.json(updatedProduct);
+    } catch (innerError) {
+      console.error('Error inside updateProduct logic:', innerError.message);
+      res.status(res.statusCode === 200 ? 500 : res.statusCode);
+      throw innerError;
+    }
   } else {
     res.status(404);
     throw new Error('Product not found');

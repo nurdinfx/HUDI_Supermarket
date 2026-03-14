@@ -22,19 +22,19 @@ export function CartProvider({ children }) {
     localStorage.setItem('hudi_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const addToCart = (product, qty = 1) => {
+  const addToCart = (product, qty = 1, size = '', color = '') => {
     setCartItems(prev => {
-      const existItem = prev.find(x => x._id === product._id);
+      const existItem = prev.find(x => x._id === product._id && x.size === size && x.color === color);
       if (existItem) {
-        return prev.map(x => x._id === product._id ? { ...x, qty: x.qty + qty } : x);
+        return prev.map(x => (x._id === product._id && x.size === size && x.color === color) ? { ...x, qty: x.qty + qty } : x);
       } else {
-        return [...prev, { ...product, qty }];
+        return [...prev, { ...product, qty, size, color }];
       }
     });
   };
 
-  const removeFromCart = (id) => {
-    setCartItems(prev => prev.filter(x => x._id !== id));
+  const removeFromCart = (id, size = '', color = '') => {
+    setCartItems(prev => prev.filter(x => !(x._id === id && x.size === size && x.color === color)));
   };
 
   const clearCart = () => {

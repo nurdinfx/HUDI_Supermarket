@@ -5,10 +5,12 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
 import { Heart, ShoppingCart, Trash2, ArrowLeft, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function WishlistPage() {
   const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const router = useRouter();
 
   if (wishlistItems.length === 0) {
     return (
@@ -84,13 +86,22 @@ export default function WishlistPage() {
                   )}
                 </div>
 
-                <button 
-                  onClick={() => addToCart(item, 1)}
-                  disabled={item.countInStock === 0}
-                  className="w-full bg-[#fae8b2] hover:bg-[#F3C235] text-gray-900 border-2 border-[#F3C235] py-3 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
-                >
-                  <ShoppingCart size={18} /> Add to Cart
-                </button>
+                {item.variants && item.variants.length > 0 ? (
+                  <button 
+                    onClick={() => router.push(`/product/${item._id}`)}
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 border-2 border-gray-300 py-3 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 active:scale-95"
+                  >
+                    Select Options
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => addToCart(item, 1)}
+                    disabled={item.countInStock === 0}
+                    className="w-full bg-[#fae8b2] hover:bg-[#F3C235] text-gray-900 border-2 border-[#F3C235] py-3 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+                  >
+                    <ShoppingCart size={18} /> Add to Cart
+                  </button>
+                )}
               </div>
             </div>
           </div>

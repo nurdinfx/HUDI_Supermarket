@@ -87,6 +87,11 @@ export default function OrderDetailsPage() {
                     <Link href={`/product/${item.product}`} className="text-[#2563EB] hover:underline hover:text-orange-600 font-medium line-clamp-2">
                       {item.name}
                     </Link>
+                    {item.size && item.size !== 'N/A' && item.color && item.color !== 'N/A' && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Size: <span className="font-semibold">{item.size}</span> | Color: <span className="font-semibold capitalize">{item.color}</span>
+                        </p>
+                    )}
                     <div className="flex justify-between items-end mt-2">
                        <p className="text-sm font-bold text-gray-900">${item.price.toFixed(2)} x {item.qty}</p>
                        <p className="text-sm font-bold text-[#b12704]">${(item.price * item.qty).toFixed(2)}</p>

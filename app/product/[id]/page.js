@@ -12,6 +12,22 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+const getColorInEnglish = (somaliColor) => {
+  const map = {
+    'cadaan': '#FFFFFF',
+    'madow': '#000000',
+    'casaan': '#FF0000',
+    'buluug': '#0000FF',
+    'cagaar': '#008000',
+    'buni': '#8B4513',
+    'buluug-maari': '#000080',
+    'huruud': '#FFFF00',
+    'liimi': '#FFA500',
+    'casuus': '#FFC0CB'
+  };
+  return map[somaliColor.toLowerCase()] || '#CCCCCC';
+};
+
 export default function ProductPage({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
@@ -19,6 +35,8 @@ export default function ProductPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [qty, setQty] = useState(1);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
   const [activeImage, setActiveImage] = useState(0);
   const { addToCart } = useCart();
   const { user } = useAuth();
@@ -29,7 +47,9 @@ export default function ProductPage({ params }) {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://hudi-supermarket.onrender.com/api'}/products/${id}`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hudi-supermarket.onrender.com/api';
+        console.log('Fetching from URL:', `${apiUrl}/products/${id}`);
+        const res = await fetch(`${apiUrl}/products/${id}`);
         
         if (!res.ok) {
           if (res.status === 404) throw new Error('Product not found');
@@ -37,6 +57,7 @@ export default function ProductPage({ params }) {
         }
         
         const data = await res.json();
+        console.log('Fetched Product Data:', JSON.stringify(data, null, 2));
         setProduct(data);
       } catch (err) {
         console.error("Fetch Error:", err);
@@ -86,6 +107,24 @@ export default function ProductPage({ params }) {
     );
   }
 
+
+  const hasVariants = product.variants && product.variants.length > 0;
+  const availableSizes = hasVariants ? [...new Set(product.variants.map(v => v.sizeLabel))] : [];
+  
+  // Filter colors based on selected size, or show all if none selected
+  const availableColors = hasVariants 
+    ? [...new Set(product.variants.filter(v => !selectedSize || v.sizeLabel === selectedSize).map(v => v.color))] 
+    : [];
+
+  const selectedVariant = hasVariants && selectedSize && selectedColor 
+    ? product.variants.find(v => v.sizeLabel === selectedSize && v.color === selectedColor) 
+    : null;
+    
+  // Current available stock to limit qty
+  const currentStock = hasVariants 
+    ? (selectedVariant ? selectedVariant.stock : 0) 
+    : product.countInStock;
+
   const unitPrice = product.discount 
     ? (product.price * (1 - product.discount/100))
     : product.price;
@@ -94,6 +133,34 @@ export default function ProductPage({ params }) {
   const totalPrice = (unitPrice * qty).toFixed(2);
   const rating = product.rating > 0 ? product.rating : (4 + (product.name.length % 10) / 10);
   const numReviews = product.numReviews > 0 ? product.numReviews : (product.name.length * 12 + 15);
+
+
+  const handleAddToCart = (redirectCheckout = false) => {
+    if (hasVariants) {
+      if (!selectedSize || !selectedColor) {
+        alert("Please select size and color before adding this product.");
+        return;
+      }
+      if (!selectedVariant) {
+        alert("Selected combination is currently unavailable.");
+        return;
+      }
+      if (qty > selectedVariant.stock) {
+        alert(`Only ${selectedVariant.stock} items left for this variant.`);
+        return;
+      }
+    } else {
+      if (qty > product.countInStock) {
+        alert("Not enough stock.");
+        return;
+      }
+    }
+    
+    addToCart(product, qty, selectedSize, selectedColor);
+    if (redirectCheckout) {
+      router.push(user ? '/checkout' : '/login?redirect=/checkout');
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -211,6 +278,85 @@ export default function ProductPage({ params }) {
                 <p className="text-xs text-gray-500 mt-2 font-medium">Standard price including local taxes and fees</p>
               </div>
 
+              {hasVariants && (
+                <div className="space-y-5 bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                  {/* Size Selection */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-black text-gray-900 uppercase tracking-tighter">Select Size</span>
+                      <button className="text-[#2563EB] text-xs font-bold hover:underline">Size Guide</button>
+                    </div>
+                    <div className="flex flex-wrap gap-2.5">
+                      {availableSizes.map(size => (
+                        <button 
+                          key={size}
+                          onClick={() => {
+                            setSelectedSize(size);
+                            setQty(1);
+                            const colorsForNewSize = product.variants.filter(v => v.sizeLabel === size).map(v => v.color);
+                            if (!colorsForNewSize.includes(selectedColor)) setSelectedColor('');
+                          }}
+                          className={`h-12 min-w-[3.5rem] px-4 rounded-xl border-2 text-sm font-black transition-all ${
+                            selectedSize === size 
+                              ? 'border-[#2563EB] bg-blue-50 text-[#2563EB] shadow-sm' 
+                              : 'border-gray-100 bg-gray-50/50 text-gray-600 hover:border-gray-300 hover:bg-white'
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Color Selection */}
+                  <div className="space-y-4 pt-4 border-t border-gray-50">
+                    <div className="text-sm font-black text-gray-900 uppercase tracking-tighter">Select Color</div>
+                    <div className="flex flex-wrap gap-3">
+                      {availableColors.map(color => {
+                        const variantMatch = product.variants.find(v => (v.sizeLabel === selectedSize || !selectedSize) && v.color === color);
+                        const isAvailableCombination = variantMatch && variantMatch.stock > 0;
+                        
+                        return (
+                          <button 
+                            key={color}
+                            disabled={!isAvailableCombination && selectedSize !== ''}
+                            onClick={() => {
+                              setSelectedColor(color);
+                              setQty(1);
+                            }}
+                            className={`px-5 py-2.5 rounded-xl border-2 text-sm font-bold transition-all capitalize flex items-center gap-2 ${
+                              selectedColor === color 
+                                ? 'border-[#2563EB] bg-blue-50 text-[#2563EB] shadow-sm' 
+                                : isAvailableCombination || selectedSize === ''
+                                  ? 'border-gray-100 bg-gray-50/50 text-gray-600 hover:border-gray-300 hover:bg-white'
+                                  : 'border-gray-50 bg-gray-50 text-gray-300 cursor-not-allowed opacity-50'
+                            }`}
+                          >
+                            <span className="w-3 h-3 rounded-full border border-black/10" style={{ backgroundColor: getColorInEnglish(color) }}></span>
+                            {color}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  {/* Status Indicator */}
+                  {selectedSize && selectedColor && (
+                    <div className={`flex items-center gap-2 text-xs font-bold p-3 rounded-xl border ${
+                      selectedVariant?.stock > 0 
+                        ? 'bg-green-50 text-green-700 border-green-100' 
+                        : 'bg-red-50 text-red-700 border-red-100'
+                    }`}>
+                      <div className={`w-2 h-2 rounded-full ${selectedVariant?.stock > 0 ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                      {selectedVariant?.stock > 0 
+                        ? `${selectedVariant.stock} Professional items ready to ship` 
+                        : 'Currently unavailable in this specific selection'}
+                    </div>
+                  )}
+                </div>
+              )}
+
+
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">About this item</h3>
                 <ul className="space-y-3">
@@ -241,7 +387,7 @@ export default function ProductPage({ params }) {
                     >-</button>
                     <span className="w-10 text-center font-bold">{qty}</span>
                     <button 
-                      onClick={() => setQty(Math.min(product.countInStock, qty + 1))}
+                      onClick={() => setQty(Math.min(currentStock || 1, qty + 1))}
                       className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white transition-colors"
                     >+</button>
                   </div>
@@ -254,19 +400,16 @@ export default function ProductPage({ params }) {
                   </div>
 
                   <button 
-                    onClick={() => addToCart(product, qty)}
-                    disabled={product.countInStock === 0}
+                    onClick={() => handleAddToCart(false)}
+                    disabled={(hasVariants ? !selectedVariant || selectedVariant.stock === 0 : product.countInStock === 0)}
                     className="w-full bg-[#fae8b2] hover:bg-[#F3C235] text-gray-900 border-2 border-[#F3C235] py-4 rounded-2xl font-black text-sm transition-all shadow-lg hover:shadow-yellow-100 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                   >
                     <ShoppingCart size={20} /> ADD TO CART
                   </button>
                   
                   <button 
-                    onClick={() => {
-                      addToCart(product, qty);
-                      router.push(user ? '/checkout' : '/login?redirect=/checkout');
-                    }}
-                    disabled={product.countInStock === 0}
+                    onClick={() => handleAddToCart(true)}
+                    disabled={(hasVariants ? !selectedVariant || selectedVariant.stock === 0 : product.countInStock === 0)}
                     className="w-full bg-[#131921] hover:bg-black text-white py-4 rounded-2xl font-black text-sm transition-all shadow-lg active:scale-95 disabled:opacity-50"
                   >
                     BUY NOW

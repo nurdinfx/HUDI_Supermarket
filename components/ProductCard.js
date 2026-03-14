@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { ShoppingCart, Heart, Star } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -9,6 +10,7 @@ import { useWishlist } from '@/context/WishlistContext';
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const router = useRouter();
 
   const renderStars = (rating) => {
     return Array(5).fill(0).map((_, i) => (
@@ -22,6 +24,8 @@ export default function ProductCard({ product }) {
 
   const currentRating = product.rating > 0 ? product.rating : (4 + ((product.name?.length || 5) % 10) / 10);
   const currentReviews = product.numReviews > 0 ? product.numReviews : ((product.name?.length || 5) * 12 + 15);
+  
+  const hasVariants = product.variants && product.variants.length > 0;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative flex flex-col h-full">
@@ -61,6 +65,18 @@ export default function ProductCard({ product }) {
             {product.name}
           </h3>
         </Link>
+
+        {/* Variant Info */}
+        {hasVariants && (
+          <div className="flex flex-wrap gap-1.5 mt-2 mb-1">
+            <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-bold uppercase">
+              {[...new Set(product.variants.map(v => v.color))].length} Colors
+            </span>
+            <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-bold uppercase">
+              {[...new Set(product.variants.map(v => v.sizeLabel))].join(', ')}
+            </span>
+          </div>
+        )}
         
         {/* Ratings */}
         <div className="flex items-center mt-2 mb-2">
@@ -84,12 +100,21 @@ export default function ProductCard({ product }) {
           </div>
           
           {/* Add to Cart */}
-          <button 
-            onClick={() => addToCart(product)}
-            className="w-full bg-[#fae8b2] hover:bg-[#F3C235] text-gray-900 border border-[#F3C235] py-2 rounded-full font-medium text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
-          >
-            <ShoppingCart size={16} /> Add to Cart
-          </button>
+          {hasVariants ? (
+            <button 
+              onClick={(e) => { e.preventDefault(); router.push(`/product/${product._id}`); }}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-300 py-2 rounded-full font-medium text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
+            >
+              Select Options
+            </button>
+          ) : (
+            <button 
+              onClick={(e) => { e.preventDefault(); addToCart(product); }}
+              className="w-full bg-[#fae8b2] hover:bg-[#F3C235] text-gray-900 border border-[#F3C235] py-2 rounded-full font-medium text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
+            >
+              <ShoppingCart size={16} /> Add to Cart
+            </button>
+          )}
         </div>
       </div>
     </div>

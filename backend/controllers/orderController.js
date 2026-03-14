@@ -23,6 +23,36 @@ const addOrderItems = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('No order items');
   } else {
+    // Validate stock and deduct
+    for (const item of orderItems) {
+      const productDoc = await Product.findById(item.product);
+      if (!productDoc) {
+        res.status(404);
+        throw new Error(`Product not found`);
+      }
+      
+      if (productDoc.variants && productDoc.variants.length > 0) {
+        const variantIndex = productDoc.variants.findIndex(v => v.sizeLabel === item.size && v.color === item.color);
+        if (variantIndex === -1) {
+          res.status(400);
+          throw new Error(`Variant ${item.size || 'none'} - ${item.color || 'none'} not found for product ${productDoc.name}`);
+        }
+        if (productDoc.variants[variantIndex].stock < item.qty) {
+          res.status(400);
+          throw new Error(`Insufficient stock for ${productDoc.name} (${item.size} - ${item.color})`);
+        }
+        // Deduct variant stock
+        productDoc.variants[variantIndex].stock -= item.qty;
+      } else {
+        if (productDoc.countInStock < item.qty) {
+          res.status(400);
+          throw new Error(`Insufficient stock for ${productDoc.name}`);
+        }
+      }
+      
+      productDoc.countInStock -= item.qty;
+      await productDoc.save();
+    }
     const order = new Order({
       orderItems,
       user: req.user._id,

@@ -38,7 +38,7 @@ export default function CartPage() {
 
   const updateQty = (item, newQty) => {
     if(newQty < 1) return;
-    addToCart(item, newQty - item.qty);
+    addToCart(item, newQty - item.qty, item.size, item.color);
   };
 
   return (
@@ -81,8 +81,13 @@ export default function CartPage() {
                               {item.name}
                             </h3>
                           </Link>
+                          {item.size && item.color && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              Size: <span className="font-semibold">{item.size}</span> | Color: <span className="font-semibold capitalize">{item.color}</span>
+                            </p>
+                          )}
                           <p className="text-green-600 text-xs font-semibold mt-1 mb-2">In Stock</p>
-                          <button onClick={() => removeFromCart(item._id)} className="text-gray-400 hover:text-red-500 text-sm flex items-center gap-1 w-fit transition">
+                          <button onClick={() => removeFromCart(item._id, item.size, item.color)} className="text-gray-400 hover:text-red-500 text-sm flex items-center gap-1 w-fit transition">
                             <Trash2 size={16} /> <span className="hidden sm:inline">Delete</span>
                           </button>
                         </div>
