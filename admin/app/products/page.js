@@ -18,7 +18,7 @@ export default function ProductsPage() {
     price: '',
     countInStock: '',
     category: '',
-    image: '',
+    images: [''],
     description: '',
     brand: '',
     variants: []
@@ -55,7 +55,7 @@ export default function ProductsPage() {
         price: product.price,
         countInStock: product.countInStock || '',
         category: product.category?._id || product.category || '',
-        image: (product.images && product.images.length > 0) ? product.images.join(', ') : (product.image || ''),
+        images: (product.images && product.images.length > 0) ? product.images : (product.image ? [product.image] : ['']),
         description: product.description || '',
         brand: product.brand || '',
         variants: product.variants || []
@@ -67,7 +67,7 @@ export default function ProductsPage() {
         price: '',
         countInStock: '',
         category: '',
-        image: '',
+        images: [''],
         description: '',
         brand: '',
         variants: []
@@ -112,7 +112,7 @@ export default function ProductsPage() {
 
     try {
       const calculatedStock = formData.variants.reduce((acc, v) => acc + (Number(v.stock) || 0), 0);
-      const imagesArray = formData.image.split(',').map(url => extractImageUrl(url.trim())).filter(url => url !== '');
+      const imagesArray = formData.images.map(url => extractImageUrl(url.trim())).filter(url => url !== '');
       
       const payload = { 
         ...formData, 
@@ -337,18 +337,47 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Images (Comma separated URLs)</label>
-                    <div className="relative">
-                      <ImageIcon className="absolute left-3 top-3 text-gray-400" size={16} />
-                      <textarea 
-                        rows="3"
-                        className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all" 
-                        value={formData.image}
-                        onChange={(e) => setFormData({...formData, image: e.target.value})}
-                        placeholder="https://img1.jpg, https://img2.jpg..."
-                      />
+                  <div className="space-y-3">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Product Gallery (Image URLs)</label>
+                    <div className="space-y-3 max-h-[250px] overflow-y-auto p-1">
+                      {formData.images.map((url, index) => (
+                        <div key={index} className="flex gap-2">
+                          <div className="relative flex-1">
+                             <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                             <input 
+                              type="text" 
+                              className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2 rounded-xl text-xs outline-none focus:border-[#2563EB] transition-all" 
+                              value={url}
+                              onChange={(e) => {
+                                const newImages = [...formData.images];
+                                newImages[index] = e.target.value;
+                                setFormData({...formData, images: newImages});
+                              }}
+                              placeholder="https://..."
+                             />
+                          </div>
+                          {formData.images.length > 1 && (
+                            <button 
+                              type="button" 
+                              onClick={() => {
+                                const newImages = formData.images.filter((_, i) => i !== index);
+                                setFormData({...formData, images: newImages});
+                              }}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
                     </div>
+                    <button 
+                      type="button" 
+                      onClick={() => setFormData({...formData, images: [...formData.images, '']})}
+                      className="text-[#2563EB] text-[10px] font-black uppercase tracking-widest flex items-center gap-1 hover:underline ml-1"
+                    >
+                      <Plus size={14} /> Add Another Image Link
+                    </button>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Description</label>

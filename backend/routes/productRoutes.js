@@ -12,7 +12,13 @@ import { protect, admin } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.route('/').get(getProducts).post(protect, admin, createProduct);
+
+// Ensure the most specific routes are first
 router.route('/:id/reviews').post(protect, createProductReview);
-router.route('/:id').get(getProductById).put(updateProduct).delete(protect, admin, deleteProduct);
+
+router.route('/:id')
+  .get(getProductById)
+  .put(updateProduct)
+  .delete(protect, admin, deleteProduct);
 
 export default router;
