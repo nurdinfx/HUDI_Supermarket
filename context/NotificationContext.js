@@ -64,13 +64,13 @@ export function NotificationProvider({ children }) {
           }
         });
       } catch (error) {
-        if (!firebaseConfig.apiKey.startsWith('YOUR_')) {
+        if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('YOUR_') && !firebaseConfig.apiKey.includes('...') && firebaseConfig.apiKey.length > 10) {
           console.error('Notification Init Error:', error);
         }
       }
     };
 
-    if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('AIzaSy')) {
+    if (firebaseConfig.apiKey && firebaseConfig.apiKey.startsWith('AIzaSy') && !firebaseConfig.apiKey.includes('...')) {
       initNotifications();
     }
   }, [user]);

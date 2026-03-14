@@ -59,7 +59,7 @@ export function NotificationProvider({ children }) {
           }
         });
       } catch (error) {
-        if (!firebaseConfig.apiKey.startsWith('YOUR_')) {
+        if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('YOUR_') && !firebaseConfig.apiKey.includes('...')) {
           console.error('Admin Notification Init Error:', error);
         }
       }

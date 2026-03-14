@@ -30,6 +30,7 @@ export default function ProductsPage() {
 
   const fetchData = async () => {
     setLoading(true);
+    setError(null); // Clear previous errors
     try {
       const [{ data: prodData }, { data: catData }] = await Promise.all([
         getAdminProducts(),
@@ -37,8 +38,9 @@ export default function ProductsPage() {
       ]);
       setProducts(prodData.products || []);
       setCategories(catData || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -195,7 +197,7 @@ export default function ProductsPage() {
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center p-1 border border-gray-200">
-                        <img src={product.images?.[0] || '/placeholder.svg'} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.svg' }} />
+                        <img src={(product.images?.[0] || '/placeholder.svg').replace('http://', 'https://')} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.svg' }} />
                       </div>
                       <div>
                         <p className="font-bold text-gray-900 text-sm line-clamp-1">{product.name}</p>

@@ -141,7 +141,7 @@ export default async function Home() {
                 <div key={i} className="min-w-[160px] max-w-[160px] cursor-pointer group">
                   <Link href={`/product/${product._id}`}>
                     <div className="h-40 bg-white flex items-center justify-center overflow-hidden mb-3">
-                       <img src={product.images?.[0] || '/placeholder.svg'} alt={product.name} className="h-full object-contain group-hover:scale-105 transition duration-500" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.svg' }} />
+                       <img src={(product.images?.[0] || '/placeholder.svg').replace('http://', 'https://')} alt={product.name} className="h-full object-contain group-hover:scale-105 transition duration-500" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.svg' }} />
                     </div>
                     <div className="text-[14px] line-clamp-2 leading-tight text-[#007185] group-hover:text-[#C7511F] mb-1 font-medium">{product.name}</div>
                     <div className="flex items-center text-orange-400 text-xs mb-1">

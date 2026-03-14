@@ -130,7 +130,7 @@ export default function CategoriesPage() {
                   <tr key={cat._id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="py-4 px-6 flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl border border-blue-100 shadow-sm shrink-0 overflow-hidden">
-                        {cat.icon?.startsWith('http') ? <img src={cat.icon} alt="Icon" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.svg' }} /> : (cat.icon || '📦')}
+                        {cat.icon?.startsWith('http') ? <img src={cat.icon.replace('http://', 'https://')} alt="Icon" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.svg' }} /> : (cat.icon || '📦')}
                       </div>
                       <div>
                         <p className="font-bold text-gray-900 text-sm">{cat.name}</p>

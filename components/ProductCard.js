@@ -48,7 +48,7 @@ export default function ProductCard({ product }) {
       <div className="relative h-48 w-full bg-white flex justify-center items-center p-4">
         <Link href={`/product/${product._id}`} className="h-full w-full block relative">
           <img 
-            src={product.images?.[0] || '/placeholder.svg'} 
+            src={(product.images?.[0] || '/placeholder.svg').replace('http://', 'https://')} 
             alt={product.name}
             className="object-contain h-full w-full group-hover:scale-105 transition-transform duration-500 mix-blend-multiply" 
             onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.svg' }}
