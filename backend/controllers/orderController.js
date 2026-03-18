@@ -17,6 +17,8 @@ const addOrderItems = asyncHandler(async (req, res) => {
     shippingPrice,
     totalPrice,
     paymentProofImage,
+    senderPhoneNumber,
+    transactionReference,
   } = req.body;
 
   if (orderItems && orderItems.length === 0) {
@@ -63,6 +65,8 @@ const addOrderItems = asyncHandler(async (req, res) => {
       shippingPrice,
       totalPrice,
       paymentProofImage,
+      senderPhoneNumber,
+      transactionReference,
       status: paymentMethod === 'Mobile Money Payment' ? (paymentProofImage ? 'Pending Verification' : 'Pending Payment') : 'Order placed',
       paymentStatus: paymentProofImage ? 'Pending Verification' : 'Pending'
     });
@@ -196,6 +200,8 @@ const submitPaymentProof = asyncHandler(async (req, res) => {
     }
     
     order.paymentProofImage = req.body.image;
+    if (req.body.senderPhoneNumber) order.senderPhoneNumber = req.body.senderPhoneNumber;
+    if (req.body.transactionReference) order.transactionReference = req.body.transactionReference;
     order.paymentStatus = 'Pending Verification';
     order.status = 'Pending Verification';
 

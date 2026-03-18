@@ -21,6 +21,8 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: { type: String, required: true },
   paymentProofImage: { type: String },
+  senderPhoneNumber: { type: String },
+  transactionReference: { type: String },
   paymentStatus: { 
     type: String, 
     enum: ['Pending', 'Pending Verification', 'Confirmed', 'Rejected'], 

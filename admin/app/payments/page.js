@@ -182,6 +182,16 @@ export default function PaymentsPage() {
                         <span className="font-bold">${selectedOrder.totalPrice.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Sender Phone:</span>
+                        <span className="font-bold text-gray-900">{selectedOrder.senderPhoneNumber || 'N/A'}</span>
+                      </div>
+                      {selectedOrder.transactionReference && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Txn Ref:</span>
+                          <span className="font-bold text-gray-900">{selectedOrder.transactionReference}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Payment Status:</span>
                         <span className="font-bold text-orange-600">{selectedOrder.paymentStatus}</span>
                       </div>

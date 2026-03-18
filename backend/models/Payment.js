@@ -7,6 +7,9 @@ const paymentSchema = new mongoose.Schema({
   method: { type: String, enum: ['COD', 'Mobile Money', 'Crypto', 'Stripe', 'PayPal'], required: true },
   status: { type: String, enum: ['Pending', 'Completed', 'Failed', 'Refunded'], default: 'Pending' },
   transactionId: { type: String },
+  phoneNumber: { type: String },
+  screenshotUrl: { type: String },
+  transactionReference: { type: String },
   paymentResult: {
     id: String,
     status: String,

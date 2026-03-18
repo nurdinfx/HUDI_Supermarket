@@ -23,6 +23,8 @@ export default function CheckoutPage() {
   const [uploading, setUploading] = useState(false);
   const [screenshot, setScreenshot] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState('');
+  const [senderPhoneNumber, setSenderPhoneNumber] = useState('');
+  const [transactionReference, setTransactionReference] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
@@ -79,9 +81,15 @@ export default function CheckoutPage() {
 
 
   const handlePlaceOrder = async (paymentId = null) => {
-    if (payment === 'Mobile Money' && !screenshot) {
-      setError('Please upload your payment screenshot before placing the order.');
-      return;
+    if (payment === 'Mobile Money Payment') {
+      if (!screenshot) {
+        setError('Please upload your payment screenshot before placing the order.');
+        return;
+      }
+      if (!senderPhoneNumber) {
+        setError('Please enter your sender phone number.');
+        return;
+      }
     }
 
     try {
@@ -103,6 +111,8 @@ export default function CheckoutPage() {
         totalPrice: total,
         discountPrice: discountAmount,
         paymentProofImage: screenshot,
+        senderPhoneNumber: payment === 'Mobile Money Payment' ? senderPhoneNumber : undefined,
+        transactionReference: payment === 'Mobile Money Payment' ? transactionReference : undefined,
         isPaid: !!paymentId,
         paidAt: paymentId ? new Date() : null,
         paymentResult: paymentId ? { id: paymentId, status: 'succeeded', update_time: new Date().toISOString(), email_address: user.email } : null
@@ -240,27 +250,60 @@ export default function CheckoutPage() {
                 <CreditCard className="text-[#2563EB]" /> Mobile Money Instructions
               </h3>
               
-              <div className="bg-blue-50 rounded-xl p-5 border border-blue-100 mb-6">
-                <p className="text-sm font-medium text-blue-800 mb-4">Please send the total amount to the number below:</p>
+              <div className="bg-blue-50 rounded-xl p-5 border border-blue-100 mb-6 font-medium">
+                <p className="text-sm font-bold text-blue-900 mb-4">Steps to pay:</p>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800 mb-6">
+                  <li>Dial the USSD code below or tap the "Dial Payment" button.</li>
+                  <li>Complete the payment on your mobile phone.</li>
+                  <li>Take a screenshot of the confirmation message.</li>
+                  <li>Return here to upload the screenshot and click "Place your order".</li>
+                </ol>
+
                 <div className="space-y-3">
                    <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-blue-200">
-                     <span className="text-gray-500 text-xs uppercase font-bold">Mobile Number</span>
-                     <span className="text-lg font-black text-gray-900">252 63 XXX XXXX</span>
+                     <span className="text-gray-500 text-xs uppercase font-bold">USSD Code</span>
+                     <span className="text-lg font-black text-gray-900 font-mono tracking-tight">*880*{process.env.NEXT_PUBLIC_MERCHANT_NUMBER || '123456'}*{total.toFixed(2)}#</span>
                    </div>
                    <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-blue-200">
                      <span className="text-gray-500 text-xs uppercase font-bold">Amount to Send</span>
                      <span className="text-lg font-black text-[#b12704]">${total.toFixed(2)}</span>
                    </div>
-                   <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-blue-200">
-                     <span className="text-gray-500 text-xs uppercase font-bold">Reference</span>
-                     <span className="text-sm font-mono font-bold text-gray-700">ORD-{Math.random().toString(36).substring(7).toUpperCase()}</span>
-                   </div>
+                   <a 
+                     href={`tel:*880*${process.env.NEXT_PUBLIC_MERCHANT_NUMBER || '123456'}*${total.toFixed(2)}%23`}
+                     className="mt-4 block w-full bg-[#2563EB] hover:bg-blue-700 text-white text-center font-bold py-3 rounded-lg shadow transition"
+                   >
+                     Dial Payment Now
+                   </a>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <label className="block">
-                  <span className="text-sm font-bold text-gray-700 mb-2 block">Upload Payment Screenshot</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Sender Phone Number <span className="text-red-500">*</span></label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={senderPhoneNumber}
+                      onChange={(e) => setSenderPhoneNumber(e.target.value)}
+                      placeholder="e.g. +252631234567" 
+                      className="w-full border border-gray-300 rounded-lg p-2.5 focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] outline-none" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Transaction Ref <span className="text-gray-400 font-normal">(Optional)</span></label>
+                    <input 
+                      type="text" 
+                      value={transactionReference}
+                      onChange={(e) => setTransactionReference(e.target.value)}
+                      placeholder="e.g. TXN123456" 
+                      className="w-full border border-gray-300 rounded-lg p-2.5 focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] outline-none" 
+                    />
+                  </div>
+                </div>
+
+                <label className="block mt-4">
+                  <span className="text-sm font-bold text-gray-700 mb-2 block">Upload Payment Screenshot <span className="text-red-500">*</span></span>
                   <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-xl transition ${screenshot ? 'border-green-300 bg-green-50' : 'border-gray-300 hover:border-[#2563EB]/50'}`}>
                     <div className="space-y-1 text-center">
                       {screenshotPreview ? (
