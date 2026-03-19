@@ -7,7 +7,7 @@ import { sendPushNotification } from '../utils/notification.js';
 // @route   GET /api/products
 // @access  Public
 const getProducts = asyncHandler(async (req, res) => {
-  const pageSize = 12;
+  const pageSize = req.query.limit !== undefined ? Number(req.query.limit) : 0;
   const page = Number(req.query.pageNumber) || 1;
 
   const keyword = req.query.keyword
@@ -33,10 +33,10 @@ const getProducts = asyncHandler(async (req, res) => {
   const products = await Product.find(combinedFilter)
     .populate('category', 'name')
     .sort({ createdAt: -1 })
-    .limit(pageSize)
-    .skip(pageSize * (page - 1));
+    .skip(pageSize * (page - 1))
+    .limit(pageSize);
 
-  res.json({ products, page, pages: Math.ceil(count / pageSize) });
+  res.json({ products, page, pages: pageSize > 0 ? Math.ceil(count / pageSize) : 1 });
 });
 
 // @desc    Fetch single product
