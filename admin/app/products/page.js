@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, MoreVertical, ExternalLink, X, Image as ImageIcon, Tag, Hash, DollarSign, Package } from 'lucide-react';
-import { getAdminProducts, createAdminProduct, updateAdminProduct, deleteAdminProduct, getAdminCategories } from '@/utils/api';
+import { Plus, Search, Edit, Trash2, MoreVertical, ExternalLink, X, Image as ImageIcon, Tag, Hash, DollarSign, Package, Upload } from 'lucide-react';
+import { getAdminProducts, createAdminProduct, updateAdminProduct, deleteAdminProduct, getAdminCategories, uploadImage, getImageUrl } from '@/utils/api';
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,6 +13,7 @@ export default function ProductsPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -100,6 +101,35 @@ export default function ProductsPage() {
       // ignore
     }
     return url;
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const data = new FormData();
+    data.append('image', file);
+
+    try {
+      const response = await uploadImage(data);
+      const imagePath = response.data;
+      const fullUrl = getImageUrl(imagePath);
+      
+      const currentImages = [...formData.images];
+      if (currentImages.length === 1 && currentImages[0] === '') {
+        currentImages[0] = fullUrl;
+      } else {
+        currentImages.push(fullUrl);
+      }
+      
+      setFormData({ ...formData, images: currentImages });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -371,13 +401,24 @@ export default function ProductsPage() {
                         </div>
                       ))}
                     </div>
-                    <button 
-                      type="button" 
-                      onClick={() => setFormData({...formData, images: [...formData.images, '']})}
-                      className="text-[#2563EB] text-[10px] font-black uppercase tracking-widest flex items-center gap-1 hover:underline ml-1"
-                    >
-                      <Plus size={14} /> Add Another Image Link
-                    </button>
+                    <div className="flex items-center gap-4 mt-2">
+                      <button 
+                        type="button" 
+                        onClick={() => setFormData({...formData, images: [...formData.images, '']})}
+                        className="text-[#2563EB] text-[10px] font-black uppercase tracking-widest flex items-center gap-1 hover:underline ml-1"
+                      >
+                        <Plus size={14} /> Add Image Link
+                      </button>
+                      <label className={`cursor-pointer text-[#2563EB] text-[10px] font-black uppercase tracking-widest flex items-center gap-1 hover:underline ml-1 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <Upload size={14} /> {isUploading ? 'Uploading...' : 'Upload Image'}
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={handleImageUpload}
+                        />
+                      </label>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Description</label>

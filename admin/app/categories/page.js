@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, X, Tag, Info } from 'lucide-react';
-import api, { getAdminCategories, createAdminCategory, updateAdminCategory, deleteAdminCategory } from '@/utils/api';
+import { Plus, Search, Edit, Trash2, X, Tag, Info, Upload } from 'lucide-react';
+import api, { getAdminCategories, createAdminCategory, updateAdminCategory, deleteAdminCategory, uploadImage, getImageUrl } from '@/utils/api';
 
 export default function CategoriesPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -10,6 +10,7 @@ export default function CategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({ name: '', icon: '', status: 'Active' });
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -36,6 +37,26 @@ export default function CategoriesPage() {
   const handleCancelEdit = () => {
     setEditId(null);
     setFormData({ name: '', icon: '', status: 'Active' });
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const data = new FormData();
+    data.append('image', file);
+
+    try {
+      const response = await uploadImage(data);
+      const imagePath = response.data;
+      setFormData({ ...formData, icon: getImageUrl(imagePath) });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const extractImageUrl = (url) => {
@@ -196,16 +217,28 @@ export default function CategoriesPage() {
                </div>
                
                <div>
-                 <label className="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Icon (Emoji or URL)</label>
-                 <div className="relative">
-                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg">✨</span>
-                   <input 
-                    type="text" 
-                    placeholder="e.g. 🥤" 
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all" 
-                    value={formData.icon}
-                    onChange={(e) => setFormData({...formData, icon: e.target.value})}
-                   />
+                 <label className="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Icon (Emoji or URL or Upload)</label>
+                 <div className="flex items-center gap-2">
+                   <div className="relative flex-1">
+                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg">✨</span>
+                     <input 
+                      type="text" 
+                      placeholder="e.g. 🥤 or https://..." 
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all" 
+                      value={formData.icon}
+                      onChange={(e) => setFormData({...formData, icon: e.target.value})}
+                     />
+                   </div>
+                   <label className={`cursor-pointer shrink-0 border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                     <Upload size={16} />
+                     {isUploading ? 'Uploading...' : 'Upload'}
+                     <input 
+                       type="file" 
+                       accept="image/*" 
+                       className="hidden" 
+                       onChange={handleFileUpload}
+                     />
+                   </label>
                  </div>
                </div>
 

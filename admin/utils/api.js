@@ -36,4 +36,18 @@ export const getAdminCoupons = () => adminApi.get('/coupons');
 export const createAdminCoupon = (coupon) => adminApi.post('/coupons', coupon);
 export const deleteAdminCoupon = (id) => adminApi.delete(`/coupons/${id}`);
 
+export const uploadImage = (formData) => adminApi.post('/upload', formData, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
+
+export const getImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
+  // Fallback to ensuring the path is correctly prepended with the backend URL
+  const baseUrl = API_URL.replace(/\/api$/, '');
+  return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+};
+
 export default adminApi;
